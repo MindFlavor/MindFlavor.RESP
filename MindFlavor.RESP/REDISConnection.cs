@@ -176,6 +176,29 @@ namespace MindFlavor.RESP
             return sReturn;
         }
 
+        public void Publish(string channel, RedisString ro)
+        {
+            Publish(channel, (RedisObject)ro);
+        }
+        public void Publish(string channel, RedisInt ro)
+        {
+            Publish(channel, (RedisObject)ro);
+        }
+
+        public void Publish(string channel, RedisObject ro)
+        {
+            List<RedisObject> lTokens = new List<RedisObject>();
+
+            lTokens.Add((RedisObject)"PUBLISH");
+            lTokens.Add((RedisObject)channel);
+            lTokens.Add(ro);
+
+            string s = SerializeArray(lTokens);
+            SendSingleLineRaw(s);
+
+            string strReturn = System.Text.Encoding.UTF8.GetString(ReceiveResponseRaw());
+        }
+
 
         protected string SerializeObject(RedisString value)
         {

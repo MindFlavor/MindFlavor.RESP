@@ -43,5 +43,52 @@ namespace UnitTestProject
                 Assert.AreEqual<string>(str, strReturn);
             }
         }
+
+
+        [TestMethod]
+        public void SetAndRetreiveInteger()
+        {
+            const int VAL = 20244;
+
+            using (
+            RedisConnection conn = new RedisConnection(new System.Net.IPEndPoint(
+                System.Net.IPAddress.Parse(REDIS_IP),
+                REDIS_PORT)))
+            {
+                conn.Open();
+
+                conn.Set("testkey", VAL);
+
+                int iReturn = (RedisInt)conn.Get("testkey");
+
+                Assert.AreEqual<int>(VAL, iReturn);
+            }
+        }
+
+        [TestMethod]
+        public void PublishInt()
+        {
+            using (
+               RedisConnection conn = new RedisConnection(new System.Net.IPEndPoint(
+                   System.Net.IPAddress.Parse(REDIS_IP),
+                   REDIS_PORT)))
+            {
+                conn.Open();
+                conn.Publish("test", 500);
+            }
+        }
+
+        [TestMethod]
+        public void PublishString()
+        {
+            using (
+               RedisConnection conn = new RedisConnection(new System.Net.IPEndPoint(
+                   System.Net.IPAddress.Parse(REDIS_IP),
+                   REDIS_PORT)))
+            {
+                conn.Open();
+                conn.Publish("test", "Pellerossa");
+            }
+        }
     }
 }

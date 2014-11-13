@@ -37,7 +37,9 @@ namespace TestConsole
             int iNum = (RedisInt) redis.Get("number");
             string strRet = (RedisString)redis.Get("multi");
 
+            redis.Publish("channel", "test!");
 
+            redis.Publish("channel", 6000);
 
             //string str;
             //while((str = Console.ReadLine().ToLower()) != "quit")
