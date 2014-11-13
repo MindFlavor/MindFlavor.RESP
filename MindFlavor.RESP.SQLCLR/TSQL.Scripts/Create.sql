@@ -1,0 +1,34 @@
+:setvar DLL_PATH D:\GIT\MindFlavor\MindFlavor.RESP\MindFlavor.RESP.SQLCLR\bin\Debug\MindFlavor.RESP.SQLCLR.dll
+
+USE [master];
+GO
+
+CREATE ASYMMETRIC KEY [MindFlavor_Key] FROM EXECUTABLE FILE = '$(DLL_PATH)'
+
+CREATE LOGIN [MindFlavor_Login] FROM ASYMMETRIC KEY [MindFlavor_Key];
+
+GRANT EXTERNAL ACCESS ASSEMBLY TO [MindFlavor_Login];
+GO
+
+CREATE DATABASE [MindFlavor];
+GO
+ALTER DATABASE [MindFlavor] SET RECOVERY SIMPLE;
+GO
+USE [MindFlavor];
+GO
+EXEC sp_changedbowner 'sa';
+GO
+
+CREATE SCHEMA [Redis];
+GO
+
+CREATE ASSEMBLY [MindFlavor.RESP.SQLCLR] FROM '$(DLL_PATH)'
+WITH PERMISSION_SET=EXTERNAL_ACCESS; 
+GO
+
+CREATE PROCEDURE Redis.Publish(@RedisServerAddress NVARCHAR(1024), @RedisServerPort INT, @Channel NVARCHAR(1024), @Message NVARCHAR(MAX))
+AS EXTERNAL NAME [MindFlavor.RESP.SQLCLR].[MindFlavor.RESP.SQLCLR.Redis].Publish;
+GO
+
+USE [master];
+GO

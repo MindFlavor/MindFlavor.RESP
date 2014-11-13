@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Net.Sockets;
 
 namespace MindFlavor.RESP
@@ -18,7 +17,7 @@ namespace MindFlavor.RESP
         #endregion
 
         #region Members
-        protected Socket socket;
+        protected TcpClient tcpClient = null;
         private byte[] bBuffer = new byte[32 * 1024];
         #endregion
 
@@ -29,19 +28,19 @@ namespace MindFlavor.RESP
 
         public void Open()
         {
-            socket = new Socket(SocketType.Stream, ProtocolType.IP);
-            socket.Connect(IPEndPoint);
+            tcpClient = new TcpClient();
+            tcpClient.Connect(IPEndPoint);
         }
 
         public void Close()
         {
-            if (socket != null)
+            if (tcpClient != null)
             {
                 SendSingleLineRaw("quit" + LINE_SEPARATOR);
                 string ret = (RedisReturnCode)DeserializeObject(ReceiveResponseRaw());
 
-                socket.Close();
-                socket = null;
+                tcpClient.Close();
+                tcpClient = null;
             }
         }
 
@@ -49,13 +48,14 @@ namespace MindFlavor.RESP
         public void SendSingleLineRaw(string str)
         {
             byte[] bToSend = System.Text.Encoding.UTF8.GetBytes(str);
-            socket.Send(bToSend);
+            tcpClient.GetStream().Write(bToSend, 0, bToSend.Length);
         }
 
         public byte[] ReceiveResponseRaw()
         {
             Array.Clear(bBuffer, 0, bBuffer.Length);
-            int iReceived = socket.Receive(bBuffer, bBuffer.Length, SocketFlags.None);
+
+            int iReceived = tcpClient.GetStream().Read(bBuffer, 0, bBuffer.Length);
 
             byte[] bRet = new byte[iReceived];
             Array.Copy(bBuffer, bRet, iReceived);
