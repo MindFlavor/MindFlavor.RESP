@@ -43,6 +43,7 @@
     <Compile Include="RedisConnection.cs" />
     <Compile Include="RedisInt.cs" />
     <Compile Include="RedisObject.cs" />
+    <Compile Include="RedisReturnCode.cs" />
     <Compile Include="RedisString.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

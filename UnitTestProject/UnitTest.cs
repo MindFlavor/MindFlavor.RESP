@@ -23,5 +23,25 @@ namespace UnitTestProject
                 conn.Open();
             }
         }
+
+        [TestMethod]
+        public void SetAndRetreiveString()
+        {
+            string str = "my mult\u1244iline cool \n{}\r\nstring with lot of stupid typos";
+
+            using (
+            RedisConnection conn = new RedisConnection(new System.Net.IPEndPoint(
+                System.Net.IPAddress.Parse(REDIS_IP),
+                REDIS_PORT)))
+            {
+                conn.Open();
+
+                conn.Set("testkey", str);
+
+                string strReturn = (RedisString)conn.Get("testkey");
+
+                Assert.AreEqual<string>(str, strReturn);
+            }
+        }
     }
 }

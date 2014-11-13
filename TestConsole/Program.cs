@@ -11,6 +11,7 @@ namespace TestConsole
     {
         static void Main(string[] args)
         {
+
             Console.Write("Opening connection to redis...");
             RedisConnection redis = new RedisConnection(new System.Net.IPEndPoint(
                 System.Net.IPAddress.Parse("10.50.50.1"),

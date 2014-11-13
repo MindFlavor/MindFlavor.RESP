@@ -37,8 +37,8 @@ namespace MindFlavor.RESP
         {
             if (socket != null)
             {
-                SendSingleLineRaw("quit");
-                DeserializeObject(ReceiveResponseRaw());
+                SendSingleLineRaw("quit" + LINE_SEPARATOR);
+                string ret = (RedisReturnCode)DeserializeObject(ReceiveResponseRaw());
 
                 socket.Close();
                 socket = null;
@@ -82,35 +82,49 @@ namespace MindFlavor.RESP
 
             iNewPos = -1;
 
-            if (bBuffer[iPos] != '$')
-                throw new ArgumentException("Expected $, received " + (char)bBuffer[iPos] + " as first char.");
-
-            iPos++;
-
-            int iIdxEndLength = iPos;
-
-            while (!((bBuffer[iIdxEndLength - 1] == LINE_SEPARATOR[0]) && (bBuffer[iIdxEndLength] == LINE_SEPARATOR[1])))
-                iIdxEndLength++;
-
-            int iLenInBytes = int.Parse(System.Text.Encoding.UTF8.GetString(bBuffer, iPos, iIdxEndLength - iPos));
-
-            if (iLenInBytes == -1)
-                return null;
-
-            iPos = iIdxEndLength + 1;
-
-            byte[] bOutput = new byte[iLenInBytes];
-
-            string strEntry = System.Text.Encoding.UTF8.GetString(bBuffer, iPos, iLenInBytes);
-
-            iNewPos = iPos + iLenInBytes + LINE_SEPARATOR.Length;
-
-            if (strEntry.StartsWith(":"))
+            if (bBuffer[iPos] == '+')
             {
-                return new RedisInt() { Value = int.Parse(strEntry.Substring(1)) };
+                #region Return code
+                string str = System.Text.Encoding.UTF8.GetString(bBuffer, iPos, bBuffer.Length - iPos);
+                iNewPos = iPos + System.Text.Encoding.UTF8.GetBytes(str).Length;
+                return new RedisReturnCode() { Value = str.Substring(1) };
+                #endregion
+            }
+            else if (bBuffer[iPos] == '$')
+            {
+                #region Single entry
+                iPos++;
+
+                int iIdxEndLength = iPos;
+
+                while (!((bBuffer[iIdxEndLength - 1] == LINE_SEPARATOR[0]) && (bBuffer[iIdxEndLength] == LINE_SEPARATOR[1])))
+                    iIdxEndLength++;
+
+                int iLenInBytes = int.Parse(System.Text.Encoding.UTF8.GetString(bBuffer, iPos, iIdxEndLength - iPos));
+
+                if (iLenInBytes == -1)
+                    return null;
+
+                iPos = iIdxEndLength + 1;
+
+                byte[] bOutput = new byte[iLenInBytes];
+
+                string strEntry = System.Text.Encoding.UTF8.GetString(bBuffer, iPos, iLenInBytes);
+
+                iNewPos = iPos + iLenInBytes + LINE_SEPARATOR.Length;
+
+                if (strEntry.StartsWith(":"))
+                {
+                    return new RedisInt() { Value = int.Parse(strEntry.Substring(1)) };
+                }
+                else
+                    return new RedisString() { Value = strEntry };
+                #endregion
             }
             else
-                return new RedisString() { Value = strEntry };
+            {
+                throw new ArgumentException("Expected $ or +, received " + (char)bBuffer[iPos] + " as first char.");
+            }
         }
 
         public RedisObject Get(string key)
