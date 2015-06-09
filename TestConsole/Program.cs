@@ -13,11 +13,24 @@ namespace TestConsole
         {
 
             Console.Write("Opening connection to redis...");
-            RedisConnection redis = new RedisConnection(new System.Net.IPEndPoint(
-                System.Net.IPAddress.Parse("10.50.50.1"),
-                6379));
+            RedisConnection redis = null;
+
+            string address = "ubuntu-spare.pelucchi.local";
+            int port = 6379;
+
+            System.Net.IPAddress ip;
+            if (!System.Net.IPAddress.TryParse(address, out ip))
+            {
+                ip = System.Net.Dns.GetHostEntry(address).AddressList[0];
+            }
+
+            System.Net.IPEndPoint ie = new System.Net.IPEndPoint(ip, port);
+
+            redis = new RedisConnection(ie);
             redis.Open();
             Console.WriteLine("done!");
+
+            redis.Publish("channel", "I was an DBA like you once, then I took an arrow to the knee...");
 
             redis.SendSingleLineRaw("PING" + RedisConnection.LINE_SEPARATOR);
             Console.WriteLine(redis.ReceiveResponseRaw());

@@ -11,7 +11,6 @@ namespace MindFlavor.RESP.SQLCLR
 
     public class Redis
     {
-        const string APPDOMAIN_CACHE_NAME = "MindFlavor.RESP.SQLCLR.RedisCache:";
 
         [SqlProcedure]
         public static void Publish(SqlString redisServerAddress, SqlInt32 redisServerPort, SqlString channel, SqlString message)
@@ -22,22 +21,22 @@ namespace MindFlavor.RESP.SQLCLR
             }
         }
 
-        private static RedisConnection GetRedisConnection(string address, int port)
-        {
-            RedisConnection redisConnection = null;
+private static RedisConnection GetRedisConnection(string address, int port)
+{
+    RedisConnection redisConnection = null;
 
-            System.Net.IPAddress ip;
-            if (!System.Net.IPAddress.TryParse(address, out ip))
-            {
-                ip = System.Net.Dns.GetHostEntry(address).AddressList[0];
-            }
+    System.Net.IPAddress ip;
+    if (!System.Net.IPAddress.TryParse(address, out ip))
+    {
+        ip = System.Net.Dns.GetHostEntry(address).AddressList[0];
+    }
 
-            System.Net.IPEndPoint ie = new System.Net.IPEndPoint(ip, port);
+    System.Net.IPEndPoint ie = new System.Net.IPEndPoint(ip, port);
 
-            redisConnection = new RedisConnection(ie);
-            redisConnection.Open();
+    redisConnection = new RedisConnection(ie);
+    redisConnection.Open();
 
-            return redisConnection;
-        }
+    return redisConnection;
+}
     }
 }
